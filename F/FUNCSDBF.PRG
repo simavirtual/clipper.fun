@@ -2571,6 +2571,7 @@ FUNCTION CreaFrmPrn(lShared,fArchvo,aNroCol,nOpcPrn,aCabPrn,aTitPrn,aPrnWww)
 	    nHanXml := nExcelXml(PathArc+'/'+fArchvo,aCabPrn,aTitPrn,aNroCol)
 
        CASE nOpcPrn == 7   // Formato Dbf
+
 	    CreaRegPrn(lShared,PathArc,fArchvo,aNroCol)
 
        CASE nOpcPrn == 8   // Formato Xml
