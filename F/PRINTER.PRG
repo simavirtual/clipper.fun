@@ -2092,8 +2092,9 @@ FUNCTION nPrinter_On(cNomUsr,FilePrn,cOpcion,lSelPrn,lFrmArc,bInsIso,;
 		       FilePrn += '.txt'
 		    ENDIF
 
-	       CASE nOpcFrm == 3
-		    FilePrn += '.dbf'
+	       CASE nOpcFrm == 3  // .dbf
+*		    FilePrn += '.dbf'
+		    FilePrn += '.xls'
 
 	       CASE nOpcFrm == 4
 		    FilePrn += '.xml'

@@ -2646,6 +2646,8 @@ FUNCTION CreaRegPrn(lShared,PathArc,fArchvo,aNroCol)
        LOCAL       i := 0                   // Contador
        LOCAL nModCry := 0                   // Modo de Protecci¢n
        LOCAL PathAct := ''                  // Path Actual
+       LOCAL cUnidad := ''                  // Unidad
+       LOCAL cUniAct := ''                  // Unidad Actual
 
        LOCAL aDbfStr := {}                  // Estructura del Archivo
 *>>>>FIN DECLARACION DE VARIABLES
@@ -2658,7 +2660,16 @@ FUNCTION CreaRegPrn(lShared,PathArc,fArchvo,aNroCol)
 *>>>>DECLARACION DE LA ESTRUCTURA
 
 *>>>>CREACION DE LA ESTRUCTURA
+       cUniAct := DISKNAME()
+       cUnidad := cUnidad(PathArc)
+
        PathAct := cPathAct()
+
+       IF cUniAct # cUnidad
+	  DISKCHANGE(cUnidad)
+       ENDIF
+
+
        DO CASE
        CASE DIRCHANGE(PathArc) == 0
 	    DBCREATE(fArchvo,aDbfStr,"DBFNTX")
@@ -2670,6 +2681,9 @@ FUNCTION CreaRegPrn(lShared,PathArc,fArchvo,aNroCol)
 	    cError('NO TIENE DERECHOS EN: '+PathArc)
        ENDCASE
 
+       IF cUniAct # cUnidad
+	  DISKCHANGE(cUniAct)
+       ENDIF
        DIRCHANGE(PathAct)
 *>>>>FIN CREACION DE LA ESTRUCTURA
 
@@ -3198,4 +3212,40 @@ FUNCTION cCambiaExt(fArchvo,FileExt)
        fArchvo += FileExt
        RETURN fArchvo
 *>>>>FIN ELIMINACION DE LA EXTENSION DEL ARCHIVO
+
+/*************************************************************************
+* TITULO..: NUMERO DE UNIDAD DE DISCO                                    *
+**************************************************************************
+
+AUTOR: Nelson Fern ndez G¢mez       FECHA DE CREACION: MAY 14/2014 MIE A
+       Colombia, Bucaramanga        INICIO:  10:10 AM   MAY 14/2014 MIE
+
+OBJETIVOS:
+
+1- Returna la Unidad de Disco
+
+*------------------------------------------------------------------------*
+*                              PROGRAMA                                  *
+*------------------------------------------------------------------------*/
+
+FUNCTION cUnidad(cPatDir)
+
+*>>>>DESCRIPCION DE PARAMETROS
+/*     cPatDir                              // Path del directorio */
+*>>>>FIN DESCRIPCION DE PARAMETROS
+
+*>>>>DECLARACION DE VARIABLES
+       LOCAL cUnidad := ''                  // Unidad
+*>>>>FIN DECLARACION DE VARIABLES
+
+*>>>>UNIDAD DE DISCO
+       IF SUBS(cPatDir,2,1) == ':'
+	  cUnidad := UPPER(SUBS(cPatDir,1,1))
+       ELSE
+	  cUnidad := DISKNAME()
+       ENDIF
+       RETURN cUnidad
+*>>>>FIN UNIDAD DE DISCO
+
+
 
