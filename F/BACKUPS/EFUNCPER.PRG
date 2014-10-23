@@ -1511,41 +1511,32 @@ FUNCTION cTipNitPer(cTipNit,lAbrevi)
 *>>>>FIN DECLARACION DE VARIABLES
 
 *>>>>ANALISIS DE DECISION
+       lAbrevi := IF(lAbrevi == NIL,.T.,lAbrevi)
        DO CASE
        CASE cTipNit == '1'  // Cedula
-	    cNomTip := 'CEDULA'
+	    cNomTip := IF(lAbrevi,'C.C','CEDULA')
 
        CASE cTipNit == '2'  // Nits Empresariales
-	    cNomTip := 'NIT DE EMPRESA'
+	    cNomTip := IF(lAbrevi,'NIT','NIT DE EMPRESA')
 
        CASE cTipNit == '3'  // Nits de Extranjer¡a
-	    cNomTip := 'NIT DE EXTRANJERIA'
+	    cNomTip := IF(lAbrevi,'NIT','NIT DE EXTRANJERIA')
 
        CASE cTipNit == '4'  // Cedula de Extrajer¡a
-	    cNomTip := 'CEDULA DE ESTRANJERIA'
+	    cNomTip := IF(lAbrevi,'C.E','CEDULA DE ESTRANJERIA')
 
        CASE cTipNit == '5'  // NUIP: N£mero £nico de identificaci¢n personal
-	    cNomTip := 'NUIP'
+	    cNomTip := IF(lAbrevi,'NUIP','NUIP')
 
        CASE cTipNit == '6'  // Tarjeta de Identidad
-	    cNomTip := 'TARJETA DE IDENTIDAD'
+	    cNomTip := IF(lAbrevi,'T.I','TARJETA DE IDENTIDAD')
 
        CASE cTipNit == '7'  // Registro Civil
-	    cNomTip := 'REGISTRO CIVIL'
+	    cNomTip := IF(lAbrevi,'R.C','REGISTRO CIVIL')
 
        ENDCASE
-*>>>>FIN ANALISIS DE DECISION
-
-*>>>>ABREVACION DE LA DESCRIPCION
-       lAbrevi := IF(lAbrevi == NIL,.T.,lAbrevi)
-       IF lAbrevi
-	  nNroPos := AT(SPACE(01),cNomtip)
-	  IF nNroPos # 0
-	     cNomTip := SUBS(cNomTip,1,nNroPos)
-	  ENDIF
-       ENDIF
        RETURN cNomTip
-*>>>>FIN ABREVACION DE LA DESCRIPCION
+*>>>>FIN ANALISIS DE DECISION
 
 /*************************************************************************
 * TITULO..: VALIDACION DEL TIPO DE DOCUMENTO                             *

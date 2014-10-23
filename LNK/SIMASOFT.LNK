@@ -22,6 +22,7 @@
        fi \SimaClip.v52\clipper.fun\FunColor
        fi \SimaClip.v52\clipper.fun\Printer
        fi \SimaClip.v52\clipper.fun\FuncsXml
+       fi \SimaClip.v52\clipper.fun\FuncsCsv
        fi \SimaClip.v52\clipper.fun\FileSys
        fi \SimaClip.v52\clipper.fun\FileStr
        fi \SimaClip.v52\clipper.fun\FilePrg

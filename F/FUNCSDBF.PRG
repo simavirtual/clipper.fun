@@ -2565,6 +2565,7 @@ FUNCTION CreaFrmPrn(lShared,fArchvo,aNroCol,nOpcPrn,aCabPrn,aTitPrn,aPrnWww)
        ENDIF
 *>>>>FIN PATH DEL ARCHIVO
 
+
 *>>>>CREACION DEL ARCHIVO DEL FORMATO DE IMPRESION
        DO CASE
        CASE nOpcPrn == 6 .AND. ('.XLS' $ UPPER(fArchvo))  // Formato Xls
@@ -2574,9 +2575,17 @@ FUNCTION CreaFrmPrn(lShared,fArchvo,aNroCol,nOpcPrn,aCabPrn,aTitPrn,aPrnWww)
 
 	    CreaRegPrn(lShared,PathArc,fArchvo,aNroCol)
 
+
+       CASE nOpcPrn == 8   // Formato Csv
+	    nHanXml := nOpenCsv(PathArc+'/'+fArchvo,;
+				aCabPrn,aTitPrn,NIL,aPrnWww)
+
+
+/*
        CASE nOpcPrn == 8   // Formato Xml
 	    nHanXml := nOpenXml(PathArc+'/'+fArchvo,;
 				aCabPrn,aTitPrn,NIL,aPrnWww)
+*/
 
        ENDCASE
        RETURN nHanXml

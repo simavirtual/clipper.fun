@@ -2042,23 +2042,23 @@ FUNCTION nPrinter_On(cNomUsr,FilePrn,cOpcion,lSelPrn,lFrmArc,bInsIso,;
 		    AADD(aMenus,'1<A Formato Prn>')
 		    AADD(aMenus,'2<A Formato Txt>')
 		    AADD(aMenus,'3<A Formato Dbf>')
-		    AADD(aMenus,'4<A Formato Xml>')
+		    AADD(aMenus,'4<A Formato Csv>')
 
 		    AADD(aAyuda,'Imprime a Formato de impresora')
 		    AADD(aAyuda,'Imprime a Formato de Archivo Texto')
 		    AADD(aAyuda,'Imprime a Formato de Archivo Dbf')
-		    AADD(aAyuda,'Imprime a Formato de Archivo Xml')
+		    AADD(aAyuda,'Imprime a Formato de Archivo Csv')
 
 	       CASE nFrmArc == 2
 		    AADD(aMenus,'1<A Formato Prn>')
 		    AADD(aMenus,'2<A Excel  2003>')
 		    AADD(aMenus,'3<A Formato Dbf>')
-		    AADD(aMenus,'4<A Formato Xml>')
+		    AADD(aMenus,'4<A Formato Csv>')
 
 		    AADD(aAyuda,'Imprime a Formato de impresora')
 		    AADD(aAyuda,'Imprime a Formato de Excel 2003')
 		    AADD(aAyuda,'Imprime a Formato de Archivo Dbf')
-		    AADD(aAyuda,'Imprime a Formato de Archivo Xml')
+		    AADD(aAyuda,'Imprime a Formato de Archivo Csv')
 
 	       ENDCASE
 
@@ -2097,7 +2097,7 @@ FUNCTION nPrinter_On(cNomUsr,FilePrn,cOpcion,lSelPrn,lFrmArc,bInsIso,;
 		    FilePrn += '.xls'
 
 	       CASE nOpcFrm == 4
-		    FilePrn += '.xml'
+		    FilePrn += '.csv'
 
 	       OTHERWISE
 		    FilePrn += '.txt'
@@ -2356,9 +2356,16 @@ FUNCTION VerPrn(nOpcPrn,FilePrn,nHandle,lHayMsg)
        CASE nOpcPrn == 7  // En Archivo Dbf
 	    DBP->(CtrlBrw(.T.,oBrowse))
 
+
+       CASE nOpcPrn == 8  // En Archivo Csv
+	    LeeTexto(FilePrn)
+	    CloseCsv(FilePrn,nHandle)
+
+/*
        CASE nOpcPrn == 8  // En Archivo Xml
 	    LeeTexto(FilePrn)
 	    CloseXml(FilePrn,nHandle)
+*/
 
        ENDCASE
 *>>>>FIN ANALISIS DE LA OPCION DE IMPRESION

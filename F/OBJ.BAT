@@ -16,6 +16,7 @@ clipper \simaclip.v52\clipper.fun\f\FuncsAyu /w/m/b
 clipper \simaclip.v52\clipper.fun\f\FunColor /w/m/b
 clipper \simaclip.v52\clipper.fun\f\printer /w/m/b
 clipper \simaclip.v52\clipper.fun\f\FuncsXml /w/m/b
+clipper \simaclip.v52\clipper.fun\f\FuncsCsv /w/m/b
 clipper \simaclip.v52\clipper.fun\f\FileSys /w/m/b
 clipper \simaclip.v52\clipper.fun\f\FileStr /w/m/b
 clipper \simaclip.v52\clipper.fun\f\FilePrg /w/m/b

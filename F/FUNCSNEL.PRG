@@ -2559,13 +2559,13 @@ FUNCTION lValTipNit(nNroFil,nNroCol,cCodigo)
 *>>>>DECLARACION DE VARIABLES
 
 *>>>>DEFINICION DE LOS TIPOS DE MATERIAS
-       aMenus := {'1<CC >',;
-		  '2<TI >',;
-		  '3<RC >',;
-		  '4<NIT>',;
-		  '5<CE >',;
-		  '6<NUI>',;
-		  '7<PP>'}
+       aMenus := {'1<CC  >',;
+		  '2<TI  >',;
+		  '3<RC  >',;
+		  '4<NIT >',;
+		  '5<CE  >',;
+		  '6<NUIP>',;
+		  '7<PP  >'}
 
        aAyudas := {'C‚dula de Ciudadania',;
 		   'Tarjeta de Identidad',;
@@ -2580,7 +2580,7 @@ FUNCTION lValTipNit(nNroFil,nNroCol,cCodigo)
        cCodigo := ALLTRIM(cCodigo)
        IF cCodigo # 'CC' .AND. cCodigo # 'TI'  .AND.;
 	  cCodigo # 'RC' .AND. cCodigo # 'NIT' .AND.;
-	  cCodigo # 'CE' .AND. cCodigo # 'NUI' .AND.;
+	  cCodigo # 'CE' .AND. cCodigo # 'NUIP' .AND.;
 	  cCodigo # 'PP'
 
 	  SAVE SCREEN
@@ -2590,7 +2590,7 @@ FUNCTION lValTipNit(nNroFil,nNroCol,cCodigo)
 	  IF nNroOpc == 0
 	     cCodigo := SPACE(03)
 	  ELSE
-	     cCodigo := ALLTRIM(SUBS('CC TI RC NITCE NUIPP ',nNroOpc*3-2,3))
+	     cCodigo := ALLTRIM(SUBS('CC  TI  RC  NIT CE  NUIPPP  ',nNroOpc*4-3,4))
 	  ENDIF
 
        ENDIF

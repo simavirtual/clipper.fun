@@ -856,6 +856,61 @@ FUNCTION dFecha(nNroAno,nNroMes,nNroDia)
        RETURN CTOD(cNroMes+'\'+cNroDia+'\'+cNroAno)
 *>>>>FIN CONVERSION DE LA FECHA
 
+
+/*************************************************************************
+* TITULO..: FECHA FINAL DEL MES                                          *
+**************************************************************************
+
+AUTOR: Nelson Fern ndez G¢mez       FECHA DE CREACION: ABR 30/2012 ABR A
+       Colombia, Bucaramanga        INICIO: 09:00 AM   ABR 30/2012 ABR
+
+OBJETIVOS:
+
+1- Calcula el d¡a del final del Mes
+
+2- Retorna la fecha final del Mes
+
+*------------------------------------------------------------------------*
+*                              PROGRAMA                                  *
+*------------------------------------------------------------------------*/
+
+FUNCTION dFecFinMes(dFecha)
+
+*>>>>DESCRIPCION DE PARAMETROS
+/*     dFecha                               // Fecha                    */
+*>>>>FIN DESCRIPCION DE PARAMETROS
+
+*>>>>DECLARACION DE VARIABLES
+       LOCAL  aFecha := {}                  // Fecha de Proceso
+       LOCAL cNroAno := ''                  // Numero del Actual
+       LOCAL cNroMes := ''                  // N£mero del Mes
+       LOCAL cNroDia := ''                  // N£mero del d¡a
+       LOCAL dFecFin := CTOD('00/00/00')    // Fecha de Proceso
+*>>>>FIN DECLARACION DE VARIABLES
+
+*>>>>FECHA FINAL DEL MES
+	aFecha := aFecha(dFecha)
+       cNroAno := aFecha[3]
+       cNroMes := aFecha[1]
+
+       DO CASE
+       CASE VAL(cNroMes) == 2
+	    IF MOD(VAL(cNroAno),4) == 0
+	       cNroDia := '29'
+	    ELSE
+	       cNroDia := '28'
+	    ENDIF
+
+       CASE VAL(cNroMes) == 11 .OR. VAL(cNroMes) == 04 .OR.;
+	    VAL(cNroMes) == 06 .OR. VAL(cNroMes) == 09
+	    cNroDia := '30'
+       OTHERWISE
+	    cNroDia := '31'
+       ENDCASE
+       RETURN CTOD(cNroMes+'\'+cNroDia+'\'+cNroAno)
+*>>>>FIN FECHA FINAL DEL MES
+
+
 /**************************************************************************
 * TITULO DE LA FUNCION......: PAUSA EN LA EJECUCION                      *
 **************************************************************************
@@ -2007,12 +2062,11 @@ FUNCTION lInterAno(nNroFil,nNroCol,cAnoIni,cAnoFin,nCopias,lMarcos)
        nAnoFin := VAL(cAnoFin)
 
        @ nNroFil  ,nNroCol GET cAnoIni PICT '9999';
-				       VALID VAL(cAnoIni) >= nAnoIni .AND.;
-					     VAL(cAnoIni) <= nAnoFin
+				       VALID LEN(cAnoIni) == 4
 
        @ nNroFil+1,nNroCol GET cAnoFin PICT '9999';
-				       VALID VAL(cAnoFin) <= nAnoFin .AND.;
-					     VAL(cAnoFin) >= nAnoIni
+				       VALID LEN(cAnoFin) == 4 .AND.;
+				       VAL(cAnoFin) >= nAnoIni
 
        lHayErr := .F.
        IF nCopias # NIL
@@ -2044,7 +2098,7 @@ FUNCTION lInterAno(nNroFil,nNroCol,cAnoIni,cAnoFin,nCopias,lMarcos)
 	 ENDIF
 
        ENDIF
-       RETURN IF(lHayErr,.F.,lPregunta('DESEA CONTINUAR? Si No'))
+       RETURN lPregunta('A¥OS:'+cAnoIni+':'+cAnoFin+'.DESEA CONTINUAR? Si No')
 *>>>>FIN INTERCAMBIO DE NIVELES
 
 /*************************************************************************
@@ -2505,26 +2559,29 @@ FUNCTION lValTipNit(nNroFil,nNroCol,cCodigo)
 *>>>>DECLARACION DE VARIABLES
 
 *>>>>DEFINICION DE LOS TIPOS DE MATERIAS
-       aMenus := {'1<CC >',;
-		  '2<TI >',;
-		  '3<RC >',;
-		  '4<NIT>',;
-		  '5<CE >',;
-		  '6<NUI>'}
+       aMenus := {'1<CC  >',;
+		  '2<TI  >',;
+		  '3<RC  >',;
+		  '4<NIT >',;
+		  '5<CE  >',;
+		  '6<NUIP>',;
+		  '7<PP  >'}
 
        aAyudas := {'C‚dula de Ciudadania',;
 		   'Tarjeta de Identidad',;
 		   'Registro Civil',;
 		   'Nit',;
 		   'C‚dula de Extranjeria',;
-		   'N£mero £nico de identificaci¢n personal'}
+		   'N£mero £nico de identificaci¢n personal',;
+		   'Pasaporte'}
 *>>>>FIN DEFINICION DE LOS TIPOS DE MATERIAS
 
 *>>>>VALIDACION DEL CODIGO
        cCodigo := ALLTRIM(cCodigo)
        IF cCodigo # 'CC' .AND. cCodigo # 'TI'  .AND.;
 	  cCodigo # 'RC' .AND. cCodigo # 'NIT' .AND.;
-	  cCodigo # 'CE' .AND. cCodigo # 'NUI'
+	  cCodigo # 'CE' .AND. cCodigo # 'NUIP' .AND.;
+	  cCodigo # 'PP'
 
 	  SAVE SCREEN
 	  nNroOpc := nMenu(aMenus,aAyudas,nNroFil,nNroCol,NIL,NIL,1,.F.)
@@ -2533,7 +2590,7 @@ FUNCTION lValTipNit(nNroFil,nNroCol,cCodigo)
 	  IF nNroOpc == 0
 	     cCodigo := SPACE(03)
 	  ELSE
-	     cCodigo := ALLTRIM(SUBS('CC TI RC NITCE NUI',nNroOpc*3-2,3))
+	     cCodigo := ALLTRIM(SUBS('CC  TI  RC  NIT CE  NUIPPP  ',nNroOpc*4-3,4))
 	  ENDIF
 
        ENDIF
@@ -4295,7 +4352,7 @@ FUNCTION xPrm(aParams,cParams,xIniPrm)
 *>>>>LECTURA DEL PARAMETRO
        xIniPrm := IF(xIniPrm == NIL,NIL,xIniPrm)
 
-       k := ASCAN(aParams,{|aArray|aArray[1] == cParams})
+       k := ASCAN(aParams,{|aArray|UPPER(aArray[1]) == UPPER(cParams)})
        IF k # 0
 	  xParams := aParams[k,2]
        ELSE

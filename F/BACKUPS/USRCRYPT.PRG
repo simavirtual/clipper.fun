@@ -717,8 +717,11 @@ FUNCTION MantenUsr(lShared,PathUsr,FileUsr,bCodBlo,cNomSis,lVerPas)
        SELECT AAA
        oBrwUsr := oDefBrwUsr(lShared,03,00,22,79,bCodBlo,cNomSis,lVerPas)
        SETKEY(K_F5,{||AsigDerech(lShared,bCodBlo,cNomSis)})
+       SETKEY(K_F9,{||CamUsrName(lShared,10,10)})
+
        AAA->(CtrlBrw(lShared,oBrwUsr))
        SETKEY(K_F5,NIL)
+       SETKEY(K_F9,NIL)
        CLOSE ALL
        RETURN NIL
 *>>>>FIN MANTENIMIENTO DEL ARCHIVO
@@ -1047,6 +1050,104 @@ FUNCTION CamPasWor(lShared,nNroFil,nNroCol,PathUsr,FileUsr,cNomUsr)
        SET COLOR TO W/N,N/W,N
        RETURN NIL
 *>>>>FIN GRABACION DE LA CLAVE
+
+/*************************************************************************
+* TITULO..: CAMBIO DEL NOMBRE DEL USUARIO                                *
+**************************************************************************
+
+AUTOR: Nelson Fern ndez G¢mez       FECHA DE CREACION: JUN 01/2009 LUN A
+       Colombia, Bucaramanga        INICIO: 10:00 AM   JUN 01/2009 LUN
+
+1- Permite Cambiar el nombre del usuario.
+
+2- Debe estar en uso el archivo de usuarios en el registro coreccto
+
+*------------------------------------------------------------------------*
+*                              PROGRAMA                                  *
+*------------------------------------------------------------------------*/
+
+FUNCTION CamUsrName(lShared,nNroFil,nNroCol)
+
+*>>>>DESCRIPCION DE PARAMETROS
+/*     lShared                              // .T. Compartir Archivos
+       nNroFil                              // N£mero de la fila
+       nNroCol                              // N£mero de la columna */
+*>>>>FIN DESCRIPCION DE PARAMETROS
+
+*>>>>DECLARACION DE VARIABLES
+       LOCAL cSavPan := ''                  // Salvar Pantalla
+       LOCAL lHayErr := .F.                 // .T. Hay Error
+
+       LOCAL nFilSup := 0                   // Fila Superior
+       LOCAL nColSup := 0                   // Columna Superior
+       LOCAL nFilInf := 0                   // Fila Inferior
+       LOCAL nColInf := 0                   // Columna Inferior
+
+       LOCAL nNroReg := 0                   // N£mero del registro
+       LOCAL nTipCur := 0                   // Tipo de Cursor
+       LOCAL cNomUsr := ''                  // Nombre del Usuario
+       LOCAL cMsgTxt := ''                  // Texto variable
+
+       LOCAL GetList := {}                  // Variable del sistema
+*>>>>DECLARACION DE VARIABLES
+
+*>>>>ANALISIS DE DECISION
+       cNomUsr := CRYPT(SUBS(AAA->A,121,10),"IVANAN")
+       IF !lPregunta('DESEA CAMBIAR EL NOMBRE DE '+;
+		    ALLTRIM(cNomUsr)+'? No Si')
+	  RETURN NIL
+       ENDIF
+       cSavPan := SAVESCREEN(0,0,24,79)
+*>>>>FIN ANALISIS DE DECISION
+
+*>>>>LECTURA DEL NOMBRE DEL USUARIO
+       nFilSup := 10
+       nColSup := 30
+       nFilInf := 15
+       nColInf := 52
+       DISPBOX(nFilSup,nColSup,nFilInf,nColInf,"ÉÍ»º¼ÍÈº")
+
+       nNroReg := AAA->(RECNO())
+       nTipCur := SETCURSOR(1)
+       DO WHILE .T.
+	  @ nFilSup+2,nColSup+2 SAY 'USUARIO:';
+				GET cNomUsr PICT '@A!'
+	  READ
+
+	  lHayErr := .T.
+	  DO CASE
+	  CASE EMPTY(cNomUsr)
+	  CASE lLocNomUsr(lShared,CRYPT(cNomUsr,"IVANAN"),.F.)
+	       cError('EL USUARIO YA ESTA CREADO')
+
+	  OTHERWISE
+	       lHayErr :=.F.
+	  ENDCASE
+	  IF lHayErr
+	     RESTSCREEN(0,0,24,79,cSavPan)
+	     AAA->(DBGOTO(nNroReg))
+	     RETURN NIL
+	  ENDIF
+	  EXIT
+
+       ENDDO
+       SETCURSOR(nTipCur)
+       RESTSCREEN(0,0,24,79,cSavPan)
+       AAA->(DBGOTO(nNroReg))
+*>>>>FIN LECTURA DEL NOMBRE DEL USUARIO
+
+*>>>>GRABACION DEL NOMBRE DEL USUARIO
+       IF AAA->(lRegLock(lShared,.F.))
+	  REPL AAA->A WITH STUFF(AAA->A,121,10,CRYPT(cNomUsr,"IVANAN"))
+	  cMsgTxt := CRYPT(STR(CHECKSUM(SUBS(AAA->A,1,130)),10),"IVANAN")
+	  REPL AAA->A WITH STUFF(AAA->A,131,10,cMsgTxt)
+	  AAA->(DBCOMMIT())
+       ENDIF
+       IF lShared
+	  AAA->(DBUNLOCK())
+       ENDIF
+       RETURN NIL
+*>>>>FIN GRABACION DEL NOMBRE DEL USUARIO
 
 /*************************************************************************
 * TITULO DE LA FUNCION..: VALIDA LA EXISTENCIA DEL ARCHIVO DE USUARIOS   *

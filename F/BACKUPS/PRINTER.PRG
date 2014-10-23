@@ -104,6 +104,8 @@ FUNCTION CreaDbfPrn(lShared,nModCry,PathArc,fArchvo,fNtxArc,aStrDbf)
        AADD(aDbfStr,{'n20Stan'   ,"Numeric"  ,03,0})  // 160 => Elite Condensado Standard
        AADD(aDbfStr,{'n20Wide'   ,"Numeric"  ,03,0})  // 272 => Elite Condensado Wide
        AADD(aDbfStr,{'nLinPag'   ,"Numeric"  ,02,0})  // L¡neas por p gina
+       AADD(aDbfStr,{'nLinCar'   ,"Numeric"  ,02,0})  // L¡neas por p gina tama¤o carta
+       AADD(aDbfStr,{'nLinOfi'   ,"Numeric"  ,02,0})  // L¡neas por p gina tama¤o Oficio
 *>>>>DECLARACION DE LA ESTRUCTURA
 
 *>>>>RETORNO DE LA ESTRUCTURA
@@ -2090,14 +2092,15 @@ FUNCTION nPrinter_On(cNomUsr,FilePrn,cOpcion,lSelPrn,lFrmArc,bInsIso,;
 		       FilePrn += '.txt'
 		    ENDIF
 
-	       CASE nOpcFrm == 3
-		    FilePrn += '.dbf'
+	       CASE nOpcFrm == 3  // .dbf
+*		    FilePrn += '.dbf'
+		    FilePrn += '.xls'
 
 	       CASE nOpcFrm == 4
 		    FilePrn += '.xml'
 
 	       OTHERWISE
-		    FilePrn += '.prn'
+		    FilePrn += '.txt'
 	       ENDCASE
 
 	       IF nOpcFrm == 2 .AND. nFrmArc == 2
@@ -2269,17 +2272,16 @@ FUNCTION VerPrn(nOpcPrn,FilePrn,nHandle,lHayMsg)
 *>>>>FIN VALIDACION DE LA OPCION DE IMPRESION
 
 *>>>>IMPRESION DE LA ULTIMA LINEA
+       SET DEVICE TO PRINT
+
        lSiorNo := .T.
        DO CASE
-       CASE nOpcPrn == 2 // Por Impresora
+       CASE nOpcPrn == 1 // Impresora Win
+       CASE nOpcPrn == 2 // Por Pantalla
+	    @ PROW()-PROW(),00 SAY ' '
        OTHERWISE
-	    lSiorNo := .F.
+	    @ PROW()+1,00 SAY '.'
        ENDCASE
-       IF lSiOrNo
-	  SET DEVICE TO PRINT
-	  @ PROW()-PROW(),00 SAY ' '
-	 *Saca la ultima linea
-       ENDIF
 
        SET PRINTER TO
        SET DEVICE TO SCREEN
@@ -2650,7 +2652,8 @@ AUTOR: Nelson Fern ndez G¢mez       FECHA DE CREACION: NOV 10/2006 VIE A
 
 OBJETIVOS:
 
-1- Imprime el pie de p gina para los informes.
+1- Imprime el pie de p gina para los informes SIN SALTO DE PAGINA
+
 2- Return NIL
 
 *------------------------------------------------------------------------*
@@ -2741,6 +2744,109 @@ FUNCTION PiePagPrn(aTxtPie,nLenPrn,nLinPie,lOficio)
 	  @ PROW(),00 SAY PCL({"CondenOf","DobGolOf"})
        ENDIF
 *       EJECT
+       RETURN NIL
+*>>>>FIN IMPRESION DEL PIE DE PAGINA
+
+/*************************************************************************
+* TITULO..: PIE DE PAGINA PARA LOS INFORMES                              *
+**************************************************************************
+
+AUTOR: Nelson Fern ndez G¢mez       FECHA DE CREACION: NOV 10/2006 VIE A
+       Colombia, Bucaramanga        INICIO: 05:20 PM   NOV 10/2006 VIE
+
+OBJETIVOS:
+
+1- Imprime el pie de p gina para los informes CON SALTO DE PAGINA
+2- Return NIL
+
+*------------------------------------------------------------------------*
+*                              PROGRAMA                                  *
+*------------------------------------------------------------------------*/
+
+FUNCTION PiePagIso(aTxtPie,nLenPrn,nLinPie,lOficio)
+
+*>>>>DESCRIPCION DE PARAMETROS
+/*     aTxtPie				    // Textos del pie de p gina
+       nLenPrn                              // Longitud de impresi¢n
+       nLinPie			            // L¡neas de impresion del pie de pagina
+       lOficio                              // .F. Tama¤o Carta */
+*>>>>FIN DESCRIPCION DE PARAMETROS
+
+*>>>>DECLARACION DE VARIABLES
+       LOCAL       i := 0                   // Contador
+       LOCAL nNroCol := 0                   // N£mero de columna
+       LOCAL cTxtPrn := ''                  // Texto a imprimir
+       LOCAL lSiorNo := .F.                 // Control de flujo
+       LOCAL aPiePag := {}                  // Pie de p gina
+*>>>>FIN DECLARACION DE VARIABLES
+
+*>>>>VALIDACION DE PARAMETROS
+       SET DEVICE TO PRINT
+       IF EMPTY(aTxtPie)
+	  EJECT
+	  RETURN NIL
+       ENDIF
+
+       lOficio := IIF(EMPTY(lOficio),.F.,lOficio)
+       IF EMPTY(nLinPie)
+	  nLinPie := IIF(lOficio,71,59)-PROW()
+       ENDIF
+*>>>>FIN VALIDACION DE PARAMETROS
+
+*>>>>CALCULO DE COLUMNA DE IMPRESION
+       nNroCol = (nLenPrn-LEN(cTxtPrn))/2
+       IF nNroCol < 0
+	  SET DEVICE TO SCREEN
+	  cError('LA COLUMNA ES NEGATIVA EN PiePagina()')
+	  SET DEVICE TO PRINT
+       ENDIF
+*>>>>FIN CALCULO DE COLUMNA DE IMPRESION
+
+*>>>>PIE DE PAGINA
+       aPiePag := {}
+       FOR i := 1 TO LEN(aTxtPie)
+
+	   IF !EMPTY(aTxtPie[i])
+	      AADD(aPiePag,aTxtPie[i])
+	   ENDIF
+
+       ENDFOR
+*>>>>FIN PIE DE PAGINA
+
+*>>>>IMPRESION DEL PIE DE PAGINA
+       FOR i := 1 TO LEN(aPiePag)
+
+***********CONVERSION DE LOS CODIGO DE IMPRESION
+	     cTxtPrn := ALLTRIM(cTxtToPcl(aPiePag[i]))
+	     IF EMPTY(cTxtPrn)
+		LOOP
+	     ENDIF
+***********FIN CONVERSION DE LOS CODIGO DE IMPRESION
+
+***********CALCULO DE COLUMNA DE IMPRESION
+	     nNroCol = (nLenPrn-LEN(cTxtPrn))/2
+	     IF nNroCol < 0
+		SET DEVICE TO SCREEN
+		cError('LA COLUMNA ES NEGATIVA EN PiePagina()')
+		SET DEVICE TO PRINT
+	     ENDIF
+***********FIN CALCULO DE COLUMNA DE IMPRESION
+
+***********IMPRESION DEL PIE DE PAGINA
+	   IF i == 1
+	      @ PROW(),00 SAY PCL({"NegraOf","CondenOn","DobGolOn"})
+	      @ PROW()+nLinPie,nNroCol SAY cTxtPrn
+	      lSiorNo := .T.
+	   ELSE
+	      @ PROW()+1,nNroCol SAY cTxtPrn
+	   ENDIF
+***********FIN IMPRESION DEL PIE DE PAGINA
+
+       ENDFOR
+       IF lSiorNo
+	  @ PROW(),00 SAY PCL({"CondenOf","DobGolOf"})
+       ENDIF
+       EJECT
        RETURN NIL
 *>>>>FIN IMPRESION DEL PIE DE PAGINA
 

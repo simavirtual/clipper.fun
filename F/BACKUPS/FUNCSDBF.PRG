@@ -1524,10 +1524,41 @@ FUNCTION cSpaces(cNalias,cNomCam)
        RETURN SPACE(aStruct[nNroCam][3])
 *>>>>FIN CALCULO DE LOS ESPACIOS DEL CAMPO
 
+/*************************************************************************
+* TITULO DE LA FUNCION..: CALCULO DE LA LONGITUD DEL CAMPO               *
+**************************************************************************
+
+OBJETIVOS:                          FECHA DE CREACION: JUL 14/94 JUE A
+						       JUL 14/94 JUE
+1- Debe estar en uso el archivo el archivo seg£n el nombre del Alias
+
+2- Retorna los espacios del campo
+
+SINTAXIS:
 
 
+*------------------------------------------------------------------------*
+*                              PROGRAMA                                  *
+*------------------------------------------------------------------------*/
 
+FUNCTION nLenField(cNalias,cNomCam)
 
+*>>>>PARAMETROS DE LA FUNCION
+/*     cNalias                              // Nombre del Alias
+       cNomCam                              // Nombre del Campo */
+*>>>>FIN PARAMETROS DE LA FUNCION
+
+*>>>>DECLARACION DE CAMPOS
+       LOCAL aStruct := {}                  // Estructura del Archivo
+       LOCAL nNroCam := 0                   // N£mero del Campo
+*>>>>FIN DECLARACION DE CAMPOS
+
+*>>>>CALCULO DE LOS ESPACIOS DEL CAMPO
+       SELECT &cNalias
+       aStruct := DBSTRUCT()
+       nNroCam := FIELDPOS(cNomCam)
+       RETURN aStruct[nNroCam][3]
+*>>>>FIN CALCULO DE LOS ESPACIOS DEL CAMPO
 
 /*************************************************************************
 * TITULO DE LA FUNCION..: CREACION DEL NOMBRE DE UN ARCHIVO TEMPORAL     *
@@ -1811,6 +1842,7 @@ FUNCTION lOrdFile(lShared,cNomArc,cClaUno,cClaDos,cClaTre,nModCry)
 	  RETURN .F.
        ENDIF
        Termometro(40)
+       nModCry := IF(nModCry==NIL,0,nModCry)
 *>>>>FIN COPIA DEL MAESTRO PARA EL ORDENAMIENTO
 
 *>>>>SELECION DE LAS AREAS DE TRABAJO
@@ -2539,6 +2571,7 @@ FUNCTION CreaFrmPrn(lShared,fArchvo,aNroCol,nOpcPrn,aCabPrn,aTitPrn,aPrnWww)
 	    nHanXml := nExcelXml(PathArc+'/'+fArchvo,aCabPrn,aTitPrn,aNroCol)
 
        CASE nOpcPrn == 7   // Formato Dbf
+
 	    CreaRegPrn(lShared,PathArc,fArchvo,aNroCol)
 
        CASE nOpcPrn == 8   // Formato Xml
@@ -2613,6 +2646,8 @@ FUNCTION CreaRegPrn(lShared,PathArc,fArchvo,aNroCol)
        LOCAL       i := 0                   // Contador
        LOCAL nModCry := 0                   // Modo de Protecci¢n
        LOCAL PathAct := ''                  // Path Actual
+       LOCAL cUnidad := ''                  // Unidad
+       LOCAL cUniAct := ''                  // Unidad Actual
 
        LOCAL aDbfStr := {}                  // Estructura del Archivo
 *>>>>FIN DECLARACION DE VARIABLES
@@ -2625,7 +2660,16 @@ FUNCTION CreaRegPrn(lShared,PathArc,fArchvo,aNroCol)
 *>>>>DECLARACION DE LA ESTRUCTURA
 
 *>>>>CREACION DE LA ESTRUCTURA
+       cUniAct := DISKNAME()
+       cUnidad := cUnidad(PathArc)
+
        PathAct := cPathAct()
+
+       IF cUniAct # cUnidad
+	  DISKCHANGE(cUnidad)
+       ENDIF
+
+
        DO CASE
        CASE DIRCHANGE(PathArc) == 0
 	    DBCREATE(fArchvo,aDbfStr,"DBFNTX")
@@ -2637,13 +2681,16 @@ FUNCTION CreaRegPrn(lShared,PathArc,fArchvo,aNroCol)
 	    cError('NO TIENE DERECHOS EN: '+PathArc)
        ENDCASE
 
+       IF cUniAct # cUnidad
+	  DISKCHANGE(cUniAct)
+       ENDIF
        DIRCHANGE(PathAct)
 *>>>>FIN CREACION DE LA ESTRUCTURA
 
 *>>>>SELECCION DE LAS AREAS DE TRABAJO
        IF !lUseDbf(.T.,PathArc+'\'+fArchvo,'DBP',NIL,lShared,nModCry)
 	  cError('ABRIENDO EL ARCHIVO DBF DE IMPRESION')
-	  CloseDbf('DBF',PathArc+'\'+fArchvo,nModCry)
+	  CloseDbf('DBP',PathArc+'\'+fArchvo,nModCry)
 	  RETURN NIL
        ENDIF
        RETURN NIL
@@ -3165,4 +3212,40 @@ FUNCTION cCambiaExt(fArchvo,FileExt)
        fArchvo += FileExt
        RETURN fArchvo
 *>>>>FIN ELIMINACION DE LA EXTENSION DEL ARCHIVO
+
+/*************************************************************************
+* TITULO..: NUMERO DE UNIDAD DE DISCO                                    *
+**************************************************************************
+
+AUTOR: Nelson Fern ndez G¢mez       FECHA DE CREACION: MAY 14/2014 MIE A
+       Colombia, Bucaramanga        INICIO:  10:10 AM   MAY 14/2014 MIE
+
+OBJETIVOS:
+
+1- Returna la Unidad de Disco
+
+*------------------------------------------------------------------------*
+*                              PROGRAMA                                  *
+*------------------------------------------------------------------------*/
+
+FUNCTION cUnidad(cPatDir)
+
+*>>>>DESCRIPCION DE PARAMETROS
+/*     cPatDir                              // Path del directorio */
+*>>>>FIN DESCRIPCION DE PARAMETROS
+
+*>>>>DECLARACION DE VARIABLES
+       LOCAL cUnidad := ''                  // Unidad
+*>>>>FIN DECLARACION DE VARIABLES
+
+*>>>>UNIDAD DE DISCO
+       IF SUBS(cPatDir,2,1) == ':'
+	  cUnidad := UPPER(SUBS(cPatDir,1,1))
+       ELSE
+	  cUnidad := DISKNAME()
+       ENDIF
+       RETURN cUnidad
+*>>>>FIN UNIDAD DE DISCO
+
+
 

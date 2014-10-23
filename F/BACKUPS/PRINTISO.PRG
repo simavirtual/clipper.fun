@@ -42,11 +42,19 @@ FUNCTION CabPrnIso(aP1,aP2,aP3,;
 *>>>>DECLARACION DE VARIABLES
        LOCAL xIniPrm := NIL                 // Inicializaci¢n del Parametro
        LOCAL nCabIso := 0                   // Encabezado Iso
+       LOCAL nNroPag := 0                   // N£mero de P gina.
 *>>>>FINDECLARACION DE VARIABLES
+
+*>>>>NUMERO DE PAGINA
+       nNroPag := xPrm(aDetInf,'nNroPag')           // N£mero de p gina
+       nNroPag := IF(nNroPag==NIL,NIL,++nNroPag)
+       nParameSet(aDetInf,'nNroPag',nNroPag)
+*>>>>FIN NUMERO DE PAGINA
 
 *>>>>ENCABEZADOS DE LOS INFORMES
        xIniPrm := 0
        nCabIso := xPrm(aDetInf,'nCabIso',xIniPrm)   // Encabezado Iso
+
        DO CASE
        CASE nCabIso == 00
 	    CabIso000(aP1,aP2,aP3,;
@@ -172,8 +180,8 @@ FUNCTION CabIso000(aP1,aP2,aP3,;
 	  cNomSis := ALLTRIM(SUBS(cNomSis,1,nPosIso-1))
        ELSE
 	  cIsoTem := ALLTRIM(cCodIso)+SPACE(02)+;
-		     ALLTRIM(cFecIso)+SPACE(02)+;
-		     ALLTRIM(cVerIso)
+		     ALLTRIM(cVerIso)+SPACE(02)+;
+		     ALLTRIM(cFecIso)
        ENDIF
 
        nNroCol = (nLenPrn-LEN(cNomSis))/2
@@ -297,6 +305,7 @@ FUNCTION CabIso099(aP1,aP2,aP3,;
        LOCAL cCodEmp := xPrm(aP1,'cCodEmp') // C¢digo de la Empresa
      *ÀDetalles de la Empresa
 
+       LOCAL nOpcPrn := xPrm(aDetInf,'nOpcPrn') // Opci¢n de Impresi¢n
        LOCAL lTamAnc := xPrm(aDetInf,'lTamAnc') // .T. Tama¤o ancho
        LOCAL nColPrn := xPrm(aDetInf,'nColPrn') // Columna de impresi¢n
 
@@ -305,7 +314,6 @@ FUNCTION CabIso099(aP1,aP2,aP3,;
        LOCAL cCodIso := xPrm(aDetInf,'cCodIso') // C¢digo Iso del Informe
        LOCAL cFecIso := xPrm(aDetInf,'cFecIso') // Fecha del Iso
        LOCAL cVerIso := xPrm(aDetInf,'cVerIso') // Versi¢n del Iso
-
 
        LOCAL nNroPag := xPrm(aDetInf,'nNroPag') // N£mero p gina a imprimir
        LOCAL cTotPag := xPrm(aDetInf,'cTotPag') // Total p ginas a imprimir
@@ -337,8 +345,18 @@ FUNCTION CabIso099(aP1,aP2,aP3,;
 *>>>>FIN LINEA DE ENCABEZADO
 
 *>>>>LOGO DE LA EMPRESA
+       IF nOpcPrn # 1 .AND. nOpcPrn # 5
+	  cLogEmp := ''
+       ENDIF
        IF !EMPTY(cLogEmp)
+/*
 	  @ PROW()+1,00 SAY '"'+cLogEmp+'"'
+	  @ PROW()+0,00 SAY SPACE(275)+'.'  // Borra el mensaje Demo
+*/
+	  nNroFil := 1
+	  @ nNroFil,001 SAY '"'+cLogEmp+'"'
+	  @ nNroFil,001 SAY '                                                                                                                                                                                                                                                                                   .'
+
        ENDIF
 *>>>>FIN LOGO DE LA EMPRESA
 
@@ -353,14 +371,9 @@ FUNCTION CabIso099(aP1,aP2,aP3,;
 
 *>>>>CODIGO DEL DOCUMENTO
        IF !EMPTY(cCodIso)
-	  nNroCol := aMarInf[3,1]
-	  IF EMPTY(cLogEmp)
-	     nNroCol := IF(EMPTY(nNroCol),80,nNroCol)
-	  ELSE
-	     nNroCol := IF(EMPTY(nNroCol),80,nNroCol)
-	  ENDIF
 
-	  nNroCol := nTotCol-LEN(cLinPrn)
+	  nNroCol := nTotCol-LEN(cLinPrn)+aMarInf[3,1]
+
 	  cLinPrn += SPACE(nNroCol)+PCL({'CondenOn'})+'C¢digo: '+cCodIso
 
 	  @ PROW()+1,00 SAY cLinPrn
@@ -380,14 +393,9 @@ FUNCTION CabIso099(aP1,aP2,aP3,;
 
 *>>>>VERSION DEL DOCUMENTO
        IF !EMPTY(cVerIso)
-	  nNroCol := aMarInf[3,2]
-	  IF EMPTY(cLogEmp)
-	     nNroCol := IF(EMPTY(nNroCol),80,nNroCol)
-	  ELSE
-	     nNroCol := IF(EMPTY(nNroCol),80,nNroCol)
-	  ENDIF
 
-	  nNroCol := nTotCol-LEN(cLinPrn)
+	  nNroCol := nTotCol-LEN(cLinPrn)+aMarInf[3,2]
+
 	  cLinPrn += SPACE(nNroCol)+PCL({'CondenOn'})+'Versi¢n: '+cVerIso
 	  @ PROW()+1,00 SAY cLinPrn
 
@@ -409,14 +417,8 @@ FUNCTION CabIso099(aP1,aP2,aP3,;
 *>>>>FECHA APROBACION DEL DOCUMENTO
        IF !EMPTY(cFecIso)
 
-	  nNroCol := aMarInf[4,1]
-	  IF EMPTY(cLogEmp)
-	     nNroCol := IF(EMPTY(nNroCol),80,nNroCol)
-	  ELSE
-	     nNroCol := IF(EMPTY(nNroCol),80,nNroCol)
-	  ENDIF
+	  nNroCol := nTotCol-LEN(cLinPrn)+aMarInf[4,1]
 
-	  nNroCol := nTotCol-LEN(cLinPrn)
 	  cLinPrn += SPACE(nNroCol)+PCL({'CondenOn'})+'Fecha: '+cFecIso
 
 	  @ PROW()+1,00 SAY cLinPrn

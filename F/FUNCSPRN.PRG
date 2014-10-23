@@ -891,8 +891,14 @@ FUNCTION lPrnOpc(lShared,nOpcPrn,FilePrn,nHandle,nAvance,nNroCol,;
        CASE nOpcPrn == 7                    // Por Archivo Dbf
 	    GraFrmPrn(lShared,aRegPrn,nOpcPrn)
 
+       CASE nOpcPrn == 8                    // Por Archivo Csv
+	    SaveRegCsv(FilePrn,nHandle,aRegPrn)
+
+/*
        CASE nOpcPrn == 8                    // Por Archivo Xml
 	    SaveRegXml(FilePrn,nHandle,aRegPrn,aTitPrn)
+*/
+
 
        ENDCASE
        SET DEVICE TO SCREEN
@@ -964,8 +970,13 @@ FUNCTION lPrnRegFrm(lShared,nOpcPrn,FilePrn,nHandle,nAvance,nNroCol,;
        CASE nOpcPrn == 7                    // Por Archivo Dbf
 	    GraFrmPrn(lShared,aRegPrn,nOpcPrn)
 
+       CASE nOpcPrn == 8                    // Por Archivo Cvs
+	    SaveRegCsv(FilePrn,nHandle,aRegPrn)
+
+/*
        CASE nOpcPrn == 8                    // Por Archivo Xml
 	    SaveRegXml(FilePrn,nHandle,aRegPrn,aTitPrn)
+*/
 
        ENDCASE
        SET DEVICE TO SCREEN

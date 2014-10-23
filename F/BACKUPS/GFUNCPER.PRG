@@ -62,7 +62,8 @@ FUNCTION CreaDbfPer(lShared,nModCry,PathArc,fArchvo,aStrDbf)
        AADD(aDbfStr,{'nTotEgrPer','Numeric',12,2}) // Total de Egresos
        AADD(aDbfStr,{'cDireccPer','Character',60,0}) // Direccion de la Casa
        AADD(aDbfStr,{'cBarrioPer','Character',40,0}) // Barrio de la Direccion
-       AADD(aDbfStr,{'cCiudadPer','Character',40,0}) // Ciudad
+       AADD(aDbfStr,{'cCiudadPer','Character',40,0}) // Ciudad de la Direcci¢n
+*       AADD(aDbfStr,{'cDepartPer','Character',40,0}) // Departamento de la Direcci¢n
        AADD(aDbfStr,{'cTelefnPer','Character',14,0}) // Telefono Casa
        AADD(aDbfStr,{'cTelFaxPer','Character',14,0}) // Telefono Fax de la Casa
        AADD(aDbfStr,{'cTelCelPer','Character',14,0}) // Telefono celular
@@ -595,6 +596,14 @@ FUNCTION oBrwDbfPer(lShared,cNomUsr,cAnoUsr,nFilSup,nColSup,nFilInf,nColInf,;
 			 {'FIELD','cCiudadPer'},{'PICTURE','@!'}}
        oBrowse:ADDCOLUMN(oColumn)
      *ÀDefinici¢n Columna
+
+/*
+       oColumn := TBCOLUMNNEW('DEPARTAMENTO',{||PER->cDepartPer})
+       oColumn:Cargo := {{'MODI',lModReg},{'ALIAS','PER'},;
+			 {'FIELD','cDepartPer'},{'PICTURE','@!'}}
+       oBrowse:ADDCOLUMN(oColumn)
+     *ÀDefinici¢n Columna
+*/
 
        oColumn := TBCOLUMNNEW('TELEFONO;CASA',{||PER->cTelefnPer})
        oColumn:Cargo := {{'MODI',lModReg},{'ALIAS','PER'},;

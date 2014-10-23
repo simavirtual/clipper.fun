@@ -401,7 +401,9 @@ FUNCTION cRegPrint(aTitulos,aTamCol,aNroCol)
 
 	  nTamCol := aTamCol[i]
 	  cTitulo := aTitulos[i]
+
 	  cTitulo := IF(lPar(LEN(cTitulo)),cTitulo,cTitulo+SPACE(01))
+
 	  nSpaces := SPACE(nTamCol/2-LEN(cTitulo)/2)
 	 *Calcula los espacios entre columna
 
@@ -670,7 +672,7 @@ AUTOR: Nelson Fern ndez G¢mez       FECHA DE CREACION: ABR 19/96 VIE A
 
 OBJETIVOS:
 
-1)- Imprime el texto por la impresora
+1)- Imprime el texto por la impresora con salto de pagina.
 
 2)- Verifica el control del cambio de p gina
 
@@ -744,6 +746,89 @@ FUNCTION lPrnReg(nAvance,nNroCol,cRegPrn,bPagina,bDerAut,bCabeza,nTotPag,;
 *>>>>FIN IMPRESION DEL REGISTRO
 
 /*************************************************************************
+* TITULO DE LA FUNCION..: IMPRESION DE UN REGISTRO                       *
+**************************************************************************
+
+AUTOR: Nelson Fern ndez G¢mez       FECHA DE CREACION: ABR 19/96 VIE A
+       Colombia, Bucaramanga        INICIO: 10:50 AM   ABR 19/96 VIE
+
+OBJETIVOS:
+
+1- Imprime el texto por la impresora sin salto de pagina.
+
+2- Verifica el control del cambio de p gina
+
+3- Esta funci¢n es igual lPrnReg pero sin salto de pagina
+
+3- Retorna .T. si debe haber cambio de p gina
+
+SINTAXIS:
+
+*------------------------------------------------------------------------*
+*                              PROGRAMA                                  *
+*------------------------------------------------------------------------*/
+
+FUNCTION lPrnRegi(nAvance,nNroCol,cRegPrn,bPagina,bDerAut,bCabeza,nTotPag,;
+		  lPrnEnc)
+
+*>>>>PARAMETROS DE LA FUNCION
+/*     nAvance                              // N£mero avances de l¡neas
+       nNroCol                              // N£mero de columna
+       cRegPrn                              // Registro a imprimir
+       bPagina                              // Funci¢n control de impresi¢n
+       bPrnAut                              // Funci¢n impresi¢n de derechos
+       bCabeza                              // Funci¢n impresi¢n Encabezado
+       nTotPag                              // Total de P ginas
+       lPrnEnc                              // .@T. Imprimir Encabezado */
+*>>>>FIN PARAMETROS DE LA FUNCION
+
+*>>>>DECLARACION DE VARIABLES
+       LOCAL lSiorNo := .F.                 // Variable de Decisi¢n
+       LOCAL lPagina := .T.                 // .T. Cambio de p gina
+*>>>>FIN DECLARACION DE VARIABLES
+
+*>>>>IMPRESION DEL ENCABEZADO
+       SET DEVICE TO PRINT
+
+       lPrnEnc := IF(lPrnEnc==NIL,.F.,lPrnEnc)
+       IF lPrnEnc
+
+	  SendCodes(PCL('Reset'))
+	  EVAL(bCabeza)
+
+	  lPrnEnc := .F.
+       ENDIF
+*>>>>FIN IMPRESION DEL ENCABEZADO
+
+*>>>>ANALISIS PARA EL CAMBIO DE PAGINA
+       lSiorNo := EVAL(bPagina)
+
+       IF lSiorNo
+	  EVAL(bDerAut)
+	 *Impresi¢n de los derechos de autor
+
+	  lPagina := .T.
+
+	  EVAL(bCabeza)
+	 *Impresi¢n del encabezado
+
+	  IF nTotPag # NIL
+	     nTotPag++
+	  ENDIF
+
+       ELSE
+	  lPagina := .F.
+       ENDIF
+*>>>>FIN ANALISIS PARA EL CAMBIO DE PAGINA
+
+*>>>>IMPRESION DEL REGISTRO
+       @ PROW()+nAvance,nNroCol SAY cRegPrn
+      *Impresi¢n del registro
+
+       RETURN lPagina
+*>>>>FIN IMPRESION DEL REGISTRO
+
+/*************************************************************************
 * TITULO..: IMPRESION DE UN REGISTRO                                     *
 **************************************************************************
 
@@ -752,7 +837,8 @@ AUTOR: Nelson Fern ndez G¢mez       FECHA DE CREACION: ABR 07/2004 MIE A
 
 OBJETIVOS:
 
-1- Imprime el texto de acuerdo a la opci¢n de impresi¢n
+1- Imprime el texto de acuerdo a la opci¢n de impresi¢n con salto de
+   pagina
 
 3- Retorna .T. si debe haber cambio de p gina
 
@@ -792,6 +878,79 @@ FUNCTION lPrnOpc(lShared,nOpcPrn,FilePrn,nHandle,nAvance,nNroCol,;
 	      cTxtPrn := cRegPrint(aRegPrn,aNroCol)
 	   ENDIF
 	   lPrnReg(nAvance,nNroCol,cTxtPrn,bPagina,;
+		   bDerAut,bCabeza,nTotPag,@lPrnEnc)
+
+       ENDIF
+*>>>>FIN IMPRESION CON FORMATO DE IMPRESORA
+
+*>>>>IMPRESION A FORMATO DE ARCHIVO ESPECIAL
+       DO CASE
+       CASE nOpcPrn == 6 .AND. '.XLS' $ UPPER(FilePrn)	 // Por Archivo Xls
+	    RgExcelXml(FilePrn,nHandle,aRegPrn,aTitPrn)
+
+       CASE nOpcPrn == 7                    // Por Archivo Dbf
+	    GraFrmPrn(lShared,aRegPrn,nOpcPrn)
+
+       CASE nOpcPrn == 8                    // Por Archivo Xml
+	    SaveRegXml(FilePrn,nHandle,aRegPrn,aTitPrn)
+
+       ENDCASE
+       SET DEVICE TO SCREEN
+       RETURN .T.
+*>>>>FIN IMPRESION A FORMATO DE ARCHIVO ESPECIAL
+
+/*************************************************************************
+* TITULO..: IMPRESION DE UN REGISTRO                                     *
+**************************************************************************
+
+AUTOR: Nelson Fern ndez G¢mez       FECHA DE CREACION: ABR 07/2004 MIE A
+       Colombia, Bucaramanga        INICIO: 01:00 PM   ABR 07/2004 VIE
+
+OBJETIVOS:
+
+1- Imprime el texto de acuerdo a la opci¢n de impresi¢n sin salto de
+   pagina.
+
+2- Esta funcion es igual a lPrnOpc
+
+3- Retorna .T. si debe haber cambio de p gina
+
+SINTAXIS:
+
+*------------------------------------------------------------------------*
+*                              PROGRAMA                                  *
+*------------------------------------------------------------------------*/
+
+FUNCTION lPrnRegFrm(lShared,nOpcPrn,FilePrn,nHandle,nAvance,nNroCol,;
+		    aTitPrn,aRegPrn,aNroCol,bPagina,bDerAut,bCabeza,;
+		    cTxtPrn,nTotPag,lPrnEnc)
+
+*>>>>PARAMETROS DE LA FUNCION
+/*     lShared                              // .T. Archivos Compartidos
+       nOpcPrn                              // Opci¢n de Impresi¢n
+       FilePrn                              // Archivo de Impresion
+       nHandle                              // Manejador de Archivo
+       nAvance                              // N£mero avances de l¡neas
+       nNroCol                              // N£mero de columna
+       aTitPrn			            // T¡tulos de Impresi¢n
+       aRegPrn			            // Registros de Impresi¢n
+       aNroCol                              // N£meros de Columnas
+       bPagina                              // Funci¢n control de impresi¢n
+       bDerAut                              // Funci¢n impresi¢n de derechos
+       bCabeza                              // Funci¢n impresi¢n Encabezado
+       cTxtPrn                              // Texto de Impresi¢n
+       nTotPag                              // Total de P ginas
+       lPrnEnc                              // .@T. Imprimir Encabezado */
+*>>>>FIN PARAMETROS DE LA FUNCION
+
+*>>>>IMPRESION CON FORMATO DE IMPRESORA
+       SET DEVICE TO PRINT
+       IF nOpcPrn < 7 .AND. !('.XLS' $ UPPER(FilePrn))
+
+	   IF cTxtPrn == NIL
+	      cTxtPrn := cRegPrint(aRegPrn,aNroCol)
+	   ENDIF
+	   lPrnRegi(nAvance,nNroCol,cTxtPrn,bPagina,;
 		   bDerAut,bCabeza,nTotPag,@lPrnEnc)
 
        ENDIF
@@ -887,30 +1046,39 @@ SINTAXIS:
 *                              PROGRAMA                                  *
 *------------------------------------------------------------------------*/
 
-FUNCTION lPagina(nLinReg)
+FUNCTION lPagina(nLinReg,lOficio,nLenPag)
 
 *>>>>PARAMETROS DE LA FUNCION
-/*     nLinReg			            // L¡neas por registro */
+/*     nLinReg			            // L¡neas por registro
+       lOficio                              // .F. Tama¤o Carta
+       nLenPag                              // @l¡neas por p gina */
 *>>>>FIN PARAMETROS DE LA FUNCION
 
 *>>>>DECLARACION DE VARIABLES
        LOCAL lPagina := .T.                 // .T. Cambio de p gina
-       LOCAL nLenPag := 60                  // L¡neas por p gina
 *>>>>FIN DECLARACION DE VARIABLES
 
-*>>>>LINEAS POR PAGINA
+*>>>>LINEAS POR PAGINA POR IMPRESORA
+       lOficio := IF(lOficio==NIL,.F.,lOficio)
+       nLenPag := IF(nLenPag==NIL,0,nLenPag)
        IF ALIAS(SELECT('PRN')) == 'PRN'
 
-	  IF EMPTY(PRN->nLinPag)
-	     IF PRN->TipoPrn # 'M'
-		nLenPag := 58
-	     ENDIF
+	  IF lOficio
+	     nLenPag := PCL('nLinOfi')
 	  ELSE
-	     nLenPag := PRN->nLinPag
+	     nLenPag := PCL('nLinCar')
 	  ENDIF
 
        ENDIF
-*>>>>FIN LINEAS POR PAGINA
+*>>>>FIN LINEAS POR PAGINA POR IMPRESORA
+
+*>>>>LINEAS POR PAGANA POR DEFECTO
+       IF lOficio
+	  nLenPag := IF(nLenPag == 0,70,nLenPag)  // Tama¤o Oficio
+       ELSE
+	  nLenPag := IF(nLenPag == 0,58,nLenPag)  // Tama¤o Carta
+       ENDIF
+*>>>>FIN LINEAS POR PAGANA POR DEFECTO
 
 *>>>>ANALISIS PARA EL CAMBIO DE PAGINA
        nLinReg := IF(nLinReg == NIL,0,nLinReg)
