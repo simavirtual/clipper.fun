@@ -484,6 +484,7 @@ FUNCTION DerechosPrn(cNomSis,cNomEmp,nLenPrn,lOficio,lPiePag,nLinPrn)
        ENDIF
 
        nNroCol = (nLenPrn-LEN(cTxtPrn))/2
+
        IF nNroCol < 0
 	  cError('LA COLUMNA ES NEGATIVA EN DerechosPrn')
        ENDIF
